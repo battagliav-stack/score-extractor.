@@ -1,10 +1,12 @@
-# Score Extractor - Simple Version (Streamlit Cloud)
+# 🎼 Score Extractor (version corrigée)
 
-Déposez une vidéo et récupérez directement la partition PDF + PNG.  
-Prêt à être déployé sur **Streamlit Cloud**.
+Application Streamlit pour extraire une partition musicale à partir d'une vidéo.
 
-## Déploiement
-1. Créez un dépôt GitHub public et ajoutez tous les fichiers.
-2. Sur [Streamlit Cloud](https://streamlit.io/cloud), cliquez **New App** et connectez votre dépôt.
-3. Branche : `main`, fichier : `app.py`, puis cliquez **Deploy**.
-4. Utilisez l’URL générée depuis votre iPhone ou navigateur.
+## Déploiement sur Streamlit Cloud
+1. Uploadez tous les fichiers (`app.py`, `score_extractor.py`, `requirements.txt`, `packages.txt`) dans un dépôt GitHub.
+2. Allez sur [Streamlit Cloud](https://streamlit.io/cloud).
+3. Créez une nouvelle app avec :
+   - Branch: `main`
+   - Main file path: `app.py`
+4. Déployez 🚀
+

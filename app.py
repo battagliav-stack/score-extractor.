@@ -1,36 +1,30 @@
 import streamlit as st
-import os, tempfile, subprocess
+import subprocess, os, tempfile
 
-st.set_page_config(page_title="Score Extractor", layout="wide")
-st.title("🎼 Score Extractor - Simple Version")
+st.title("🎷 Extracteur de Partition depuis une Vidéo")
 
-st.markdown("Déposez une vidéo et récupérez directement la partition PDF + PNG")
+uploaded_file = st.file_uploader("Choisissez une vidéo", type=["mp4", "mov", "avi", "mkv"])
 
-uploaded_video = st.file_uploader("Vidéo (mp4, mov, avi...)", type=["mp4","mov","avi","mkv"])
+if uploaded_file:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp:
+        tmp.write(uploaded_file.read())
+        video_path = tmp.name
 
-if uploaded_video:
-    tmp_dir = tempfile.mkdtemp()
-    input_path = os.path.join(tmp_dir, uploaded_video.name)
-    with open(input_path, "wb") as f:
-        f.write(uploaded_video.read())
+    out_pdf = os.path.join(tempfile.gettempdir(), "partition.pdf")
 
-    out_pdf = os.path.join(tmp_dir, "partition.pdf")
-    out_png = os.path.join(tmp_dir, "partition.png")
+    try:
+        st.info("⏳ Extraction en cours... (cela peut prendre un moment)")
+        result = subprocess.run(
+            ["python", "score_extractor.py", "--video", video_path, "--out", out_pdf, "--skip", "90"],
+            capture_output=True, text=True
+        )
 
-    cmd = ["python", "score_extractor.py", "--video", input_path, "--out", out_pdf]
+        if result.returncode == 0 and os.path.exists(out_pdf):
+            st.success("✅ Partition générée ! Téléchargez-la ci-dessous :")
+            with open(out_pdf, "rb") as f:
+                st.download_button("📥 Télécharger le PDF", f, file_name="partition.pdf")
+        else:
+            st.error("❌ Erreur lors de l'extraction :\n" + result.stderr)
 
-    if st.button("Extraire la partition"):
-        with st.spinner("Extraction en cours..."):
-            try:
-                subprocess.run(cmd, check=True)
-                st.success("Extraction terminée !")
-                with open(out_pdf, "rb") as f_pdf:
-                    st.download_button("📥 Télécharger le PDF", f_pdf, file_name="partition.pdf")
-                with open(out_png, "rb") as f_png:
-                    st.download_button("📥 Télécharger le PNG", f_png, file_name="partition.png")
-                st.image(out_png, caption="Aperçu de la partition", use_column_width=True)
-            except subprocess.CalledProcessError as e:
-                st.error("Erreur lors du traitement de la vidéo.")
-                st.text(str(e))
-else:
-    st.info("Importez une vidéo pour commencer.")
+    except Exception as e:
+        st.error(f"⚠️ Une erreur est survenue : {e}")
